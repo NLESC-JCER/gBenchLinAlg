@@ -1,0 +1,13 @@
+#!/bin/bash
+
+NREP=10
+OPTS="--benchmark_display_aggregates_only=true --benchmark_report_aggregates_only=true"
+EXEC= 
+
+for OMP in 1 2 4 8 16; do
+
+	export OPENBLAS_NUM_THREADS=${OMP}
+	outfile="arma_${OMP}.out"
+	${EXEC} --benchmark_out=${outfile} --benchmark_repetitions=${NREP} ${OPTS}
+
+done
