@@ -3,7 +3,7 @@
 find_package(Threads REQUIRED)
 
 # Add compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O2 -Wall -fopenmp -march=native")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -fopenmp -march=native")
 message(STATUS "CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
 
 file(GLOB_RECURSE ALL_BENCH_CPP *.cc)
