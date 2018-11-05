@@ -1,5 +1,5 @@
 #specify the minimum CMake version
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5.2)
 
 # project Name
 project(gBenchLA)
@@ -13,6 +13,9 @@ set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
+#Search for Benchmark
+find_package(benchmark REQUIRED)
+message(STATUS "BENCHMARK PACKAGE: " ${BENCHMARK_LIBRARIES})
 # search for armadillo
 find_package(Armadillo REQUIRED)
 include_directories(${ARMADILLO_INCLUDE_DIRS})
@@ -20,7 +23,7 @@ MESSAGE (STATUS "ARMADILLO PATH:" ${ARMADILLO_LIBRARIES})
 
 # search for Eigen
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
-include_directories(${EIGEN3_INCLUDE_DIR})
+include_directories(${EIGEN3_INCLUDE_DIR}) 
 message(STATUS "EIGEN Include: " ${EIGEN3_INCLUDE_DIR})
 
 # search for MPI
