@@ -14,6 +14,6 @@ foreach(ONE_BENCH_CPP ${ALL_BENCH_CPP})
 	add_executable(${TARGET_NAME} ${ONE_BENCH_CPP})
 	set_target_properties(${TARGET_NAME} PROPERTIES OUTPUT_NAME ${ONE_BENCH_EXEC}
 	                                                LINK_FLAGS ${Elemental_LINK_FLAGS})
-	target_link_libraries(${TARGET_NAME} ${Elemental_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} -lbenchmark)
+	target_link_libraries(${TARGET_NAME} ${Elemental_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} -lbenchmark -lstdc++fs)
 
 endforeach()
