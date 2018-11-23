@@ -104,10 +104,11 @@ namespace {
     }
 
 }
-BENCHMARK(mpi_benchmark)->Args({4,4})->Unit(benchmark::kMillisecond)->UseRealTime();
-// BENCHMARK(mpi_benchmark)->Arg(2048)->Unit(benchmark::kMillisecond)->UseRealTime();
-// BENCHMARK(mpi_benchmark)->Arg(4096)->Unit(benchmark::kMillisecond)->UseRealTime();
-// BENCHMARK(mpi_benchmark)->Arg(8192)->Unit(benchmark::kMillisecond)->UseRealTime();
+BENCHMARK(mpi_benchmark)->Args({512,4})->Unit(benchmark::kMillisecond)->UseRealTime();
+// BENCHMARK(mpi_benchmark)->Args({1024,4})->Unit(benchmark::kMillisecond)->UseRealTime();
+// BENCHMARK(mpi_benchmark)->Args({2048,4})->Unit(benchmark::kMillisecond)->UseRealTime();
+// BENCHMARK(mpi_benchmark)->Args({4096,4})->Unit(benchmark::kMillisecond)->UseRealTime();
+// BENCHMARK(mpi_benchmark)->Args({8192,4})->Unit(benchmark::kMillisecond)->UseRealTime();
 
 // Blank reported for the slaves
 class NullReporter : public ::benchmark::BenchmarkReporter {

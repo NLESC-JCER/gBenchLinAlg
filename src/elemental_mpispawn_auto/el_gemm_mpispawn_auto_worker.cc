@@ -75,8 +75,14 @@ void send_mat(ElMat A, int rank, MPI_Comm parentcomm)
         }
     }
 
+    El::mpi::Barrier();
     A.ProcessPullQueue(localData);
-    MPI_Send(localData,size,MPI_DOUBLE, 0, 0, parentcomm);
+    if (rank == 0)
+    {
+        MPI_Send(localData,size,MPI_DOUBLE, 0, 0, parentcomm);
+        free(localData);
+    }
+    
 }
 
 
