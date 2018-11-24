@@ -8,9 +8,10 @@ using std::endl;
 
 
 typedef El::DistMatrix<double,El::MC,El::MR,El::ELEMENT> ElMat;
+typedef El::DistMatrix<double,El::CIRC,El::CIRC,El::ELEMENT> ElMatCIRC;
 El::Matrix<double> ElLocalMat;
 
-ElMat recv_mat(int rank, MPI_Comm parentcomm, const El::Grid& grid)
+ElMat recv_mat_queue(int rank, MPI_Comm parentcomm, const El::Grid& grid)
 {
 
     // Receive the metadata
@@ -55,7 +56,44 @@ ElMat recv_mat(int rank, MPI_Comm parentcomm, const El::Grid& grid)
     return  M;
 }
 
-void send_mat(ElMat A, int rank, MPI_Comm parentcomm)
+ElMat recv_mat_circ(int rank, MPI_Comm parentcomm, const El::Grid& grid)
+{
+
+    // Receive the metadata
+    int *mat_data;
+    mat_data = (int*)calloc(2,sizeof(int));
+    MPI_Bcast(mat_data, 2, MPI_INT, 0, parentcomm);
+
+    // get the matrix size
+    int nrows = mat_data[0];
+    int ncols = mat_data[1];
+    int size = nrows*ncols;
+
+    // create the distributed matrix
+
+    ElMatCIRC M(grid);
+    El::Zeros(M,nrows,ncols);
+
+    // ROOT Child receive the data
+    // then QueueUp all the data of A
+    if (rank == 0)
+    {
+        // receive the buffer
+        double *localData;
+        localData = (double *) calloc(size,sizeof(double));
+        MPI_Recv(localData, size, MPI_DOUBLE, 0, 0, parentcomm, MPI_STATUS_IGNORE);
+
+        // reserve and queue the data
+        M.Attach(nrows,ncols,grid,0,0,localData,nrows);
+    }
+
+    // all process Process the Queue
+    El::mpi::Barrier();
+    ElMat out(M);
+    return  out;
+}
+
+void send_mat_queue(ElMat A, int rank, MPI_Comm parentcomm)
 {
     double *localData;
     int size = A.Height()*A.Width();
@@ -85,6 +123,19 @@ void send_mat(ElMat A, int rank, MPI_Comm parentcomm)
     
 }
 
+void send_mat_circ(ElMat A, int rank, MPI_Comm parentcomm)
+{
+
+    int size = A.Height()*A.Width();
+    ElMatCIRC out(A);
+
+    // Process all queues
+    El::mpi::Barrier();
+    if (rank == 0)
+    {
+        MPI_Send(out.Buffer(),size,MPI_DOUBLE, 0, 0, parentcomm);
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -106,16 +157,16 @@ int main(int argc, char *argv[])
     const El::Grid grid(comm);
 
     // get the A matrix
-    ElMat A = recv_mat(workerRank, parentcomm, grid);
+    ElMat A = recv_mat_circ(workerRank, parentcomm, grid);
     //El::Print(A,"A Distributed matrix");
     
     // get the B matrix
-    ElMat B = recv_mat(workerRank, parentcomm, grid);
+    ElMat B = recv_mat_circ(workerRank, parentcomm, grid);
     //El::Print(B,"B Distributed matrix");
 
     // // create the C Matrix
     ElMat C(grid);
-    El::Zeros(C,A.Height(),B.Width());
+    //El::Zeros(C,A.Height(),B.Width());
 
     // perform the mult
     const El::Orientation ori = El::NORMAL;
@@ -124,7 +175,7 @@ int main(int argc, char *argv[])
     //El::Print(C,"C Distributed matrix");
 
     // send the result back to the parent
-    send_mat(C,workerRank,parentcomm);
+    send_mat_circ(C,workerRank,parentcomm);
 
     El::mpi::Barrier();
     MPI_Comm_free(&parentcomm);
